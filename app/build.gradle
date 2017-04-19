@@ -1,0 +1,146 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    //manage the version of all dependencies
+    ext.rxandroid_version = '2.0.1'
+    ext.greendao_version = '3.2.0'
+    ext.rxjava_version = '2.0.1'
+    ext.logging_interceptror_version = '3.4.1'
+    ext.retrofit_version = '2.2.0'
+    ext.suppot_version = '25.3.1'
+    ext.dagger_version = '2.10'
+    ext.lambda_version = '3.4.0'
+    ext.guava_version = '21.0'
+    ext.fresco_version = '1.2.0'
+    ext.dialogs_version = '0.9.4.3'
+    ext.xbanner_version = '1.2.7'
+    ext.leakcanary_version = '1.5'
+    ext.logger_version = '1.15'
+    dependencies {
+        classpath "me.tatarka:gradle-retrolambda:$lambda_version"
+    }
+}
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
+apply plugin: 'me.tatarka.retrolambda'
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.focus.tilitili"
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("$rootDir/focus.jks")
+            storePassword "sam26000"
+            keyAlias "focus"
+            keyPassword "sam26000"
+        }
+
+        release {
+            storeFile file("$rootDir/focus.jks")
+            storePassword "sam26000"
+            keyAlias "focus"
+            keyPassword "sam26000"
+        }
+    }
+
+    productFlavors {
+        dev {
+            // Enable pre-dexing to produce an APK that can be tested on
+            // Android 5.0+ without the time-consuming DEX build processes.
+            minSdkVersion 21
+        }
+        prod {
+            // The actual minSdkVersion for the production version.
+            minSdkVersion 14
+        }
+        String[] channelArray = CHANNELS.split(',')
+        for (int i = 0; i < channelArray.size(); i++) {
+            def channel = channelArray[i]
+            "${channel}" {
+                manifestPlaceholders = [CHANNEL_VALUE: channel]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            zipAlignEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //签名
+            signingConfig signingConfigs.release
+        }
+    }
+
+    dataBinding {
+        enabled true
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    applicationVariants.all { variant ->
+        def apk = variant.outputs[0].outputFile;
+        def newName = apk.name.replace(project.name, "tilitili_" + versionName + "_" + versionCode)
+        if (project.hasProperty("BUILD_TIME")) {
+            newName = apk.name.replace(project.name, "tilitili_" + versionName + "_" + versionCode + "_" + BUILD_TIME.toString())
+        }
+        variant.outputs[0].outputFile = new File(apk.parentFile, newName);
+    }
+}
+
+greendao {
+    schemaVersion 1
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.google.code.findbugs'
+    })
+    compile "com.android.support:appcompat-v7:$suppot_version"
+    compile "com.android.support:design:$suppot_version"
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:multidex:1.0.1'
+    //http retrofit
+    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
+    compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+    compile "com.squareup.okhttp3:logging-interceptor:$logging_interceptror_version"
+    //rx
+    compile "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
+    compile "io.reactivex.rxjava2:rxjava:$rxjava_version"
+    //dagger
+    compile "com.google.dagger:dagger:$dagger_version"
+    compile "com.google.dagger:dagger-android-support:$dagger_version"
+    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
+    //image
+    compile "com.facebook.fresco:fresco:$fresco_version"
+    //dialog
+    compile "com.afollestad.material-dialogs:core:$dialogs_version"
+    compile "com.afollestad.material-dialogs:commons:$dialogs_version"
+    //xbanner: auto viewpager
+    compile "com.xhb:xbanner:$xbanner_version"
+    //leakcanary
+    debugCompile "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$leakcanary_version"
+    testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$leakcanary_version"
+    //database
+    compile "org.greenrobot:greendao:$greendao_version"
+    //logger
+    compile "com.orhanobut:logger:$logger_version"
+}
