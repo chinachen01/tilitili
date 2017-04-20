@@ -9,12 +9,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.focus.tilitili.component.net.HttpClient;
+import com.google.gson.Gson;
 import com.orhanobut.logger.Logger;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -22,9 +26,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Logger.d("begin %s", "init");
-        Log.d("tilitili", "onCreate: ");
         setContentView(R.layout.activity_main);
+        test();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -47,6 +50,24 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
+    private void test() {
+        HttpClient.getInstance().getApiService()
+                .getMovie("1764796")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((movie) -> Logger.json(new Gson().toJson(movie)),
+                        (error) -> Logger.d(error.getMessage()));
+        HttpClient.getInstance().getApiService()
+                .getMovie("1764123123796")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((movie) -> Logger.json(new Gson().toJson(movie)),
+                        (error) -> Logger.d(error.getMessage()));
+    }
+
+    public void onClick(View view) {
+        test();
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
