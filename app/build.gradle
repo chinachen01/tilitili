@@ -17,6 +17,7 @@ buildscript {
     ext.xbanner_version = '1.2.7'
     ext.leakcanary_version = '1.5'
     ext.logger_version = '1.15'
+    ext.stetho_version = '1.5.0'
     dependencies {
         classpath "me.tatarka:gradle-retrolambda:$lambda_version"
     }
@@ -54,6 +55,13 @@ android {
     }
 
     productFlavors {
+        String[] channelArray = CHANNELS.split(',')
+        for (int i = 0; i < channelArray.size(); i++) {
+            def channel = channelArray[i]
+            "${channel}" {
+                manifestPlaceholders = [CHANNEL_VALUE: channel]
+            }
+        }
         dev {
             // Enable pre-dexing to produce an APK that can be tested on
             // Android 5.0+ without the time-consuming DEX build processes.
@@ -62,13 +70,6 @@ android {
         prod {
             // The actual minSdkVersion for the production version.
             minSdkVersion 14
-        }
-        String[] channelArray = CHANNELS.split(',')
-        for (int i = 0; i < channelArray.size(); i++) {
-            def channel = channelArray[i]
-            "${channel}" {
-                manifestPlaceholders = [CHANNEL_VALUE: channel]
-            }
         }
     }
 
@@ -147,4 +148,5 @@ dependencies {
     compile "org.greenrobot:greendao:$greendao_version"
     //logger
     compile "com.orhanobut:logger:$logger_version"
+    compile "com.facebook.stetho:stetho-okhttp3:$stetho_version"
 }

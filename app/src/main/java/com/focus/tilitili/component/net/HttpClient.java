@@ -1,6 +1,7 @@
 package com.focus.tilitili.component.net;
 
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.focus.tilitili.BuildConfig;
 import com.focus.tilitili.app.App;
 import com.focus.tilitili.component.net.cookie.ClearableCookieJar;
@@ -29,7 +30,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class HttpClient {
-    public static final String BASE_HOST_URL = "http://api.douban.com/";
+    private static final String BASE_HOST_URL = "https://api.douban.com/";
 
     private Retrofit mRetrofit;
     private ApiService mService;
@@ -42,6 +43,7 @@ public class HttpClient {
                 HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
                 loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
                 builder.addInterceptor(loggingInterceptor);
+                builder.addNetworkInterceptor(new StethoInterceptor());
             }
             File cacheFile = new File(Constants.PATH_CACHE);
             Cache cache = new Cache(cacheFile, 1024 * 1024 * 50);
